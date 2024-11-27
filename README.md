@@ -30,4 +30,4 @@ android {
 ```
 distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip        //gradle-wrapper.properties
 ```
-说明：源代码打开后是一个简单的记事本项目，可以实现新建笔记，删除笔记，修改笔记，修改标题以及复制粘贴的功能，界面如下图所示<br> ![]
+说明：源代码打开后是一个简单的记事本项目，可以实现新建笔记，删除笔记，修改笔记，修改标题以及复制粘贴的功能，界面如下图所示<br> ![image]()
