@@ -1,0 +1,35 @@
+// 使用 Gradle 8.7 的插件版本
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdk 33 // 更新到较新的编译 SDK 版本
+
+    defaultConfig {
+        applicationId "com.example.android.notepad"
+        minSdkVersion 21 // 推荐 minSdkVersion 至少为 21，以支持较新的 API
+        targetSdkVersion 33 // 更新到较新的目标 SDK 版本
+
+        testApplicationId "com.example.android.notepad.tests"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner" // 使用 androidx 的测试运行器
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' // 更新 ProGuard 配置文件名
+        }
+    }
+    namespace 'com.example.android.notepad'
+
+    // 如果您的项目使用 Kotlin，则需要添加 Kotlin 的 Android 配置
+    // kotlinOptions {
+    //     jvmTarget = '1.8'
+    // }
+}
+
+// 更新 Gradle 版本到 8.7
+// 在项目根目录下的 gradle/wrapper/gradle-wrapper.properties 文件中更新 distributionUrl
+// distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
+

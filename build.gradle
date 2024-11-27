@@ -1,0 +1,18 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.6.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google() // 添加 Google Maven 仓库
+        jcenter() // 如果仍然需要，保留 jcenter()
+    }
+}
+

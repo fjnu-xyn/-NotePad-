@@ -1,0 +1,7 @@
+com.example.android.notepad.app-pngs-0 E:\NewNotePad\app\build\generated\res\pngs\debug
+com.example.android.notepad.app-resValues-1 E:\NewNotePad\app\build\generated\res\resValues\debug
+com.example.android.notepad.app-packageDebugResources-2 E:\NewNotePad\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.android.notepad.app-packageDebugResources-3 E:\NewNotePad\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.android.notepad.app-debug-4 E:\NewNotePad\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.example.android.notepad.app-debug-5 E:\NewNotePad\app\src\debug\res
+com.example.android.notepad.app-main-6 E:\NewNotePad\app\src\main\res

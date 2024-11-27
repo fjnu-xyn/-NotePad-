@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!-- 第一行，包含图片和文字 -->
+
+    <!-- 第二行保留不变 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <!-- 添加的图片 -->
+        <ImageView
+            android:id="@+id/image1"
+            android:layout_width="53dp"
+            android:layout_height="64dp"
+            android:layout_marginRight="8dp"
+            android:src="@drawable/notebook" />
+
+        <!-- 原来的 TextView -->
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="384dp"
+            android:layout_height="96dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@android:id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:gravity="center_vertical"
+        android:paddingLeft="5dp"
+        android:singleLine="true" />
+
+</LinearLayout>
+

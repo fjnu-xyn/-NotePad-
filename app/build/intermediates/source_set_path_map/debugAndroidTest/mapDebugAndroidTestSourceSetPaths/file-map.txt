@@ -1,0 +1,4 @@
+com.example.android.notepad.test.app-androidTest-0 E:\NewNotePad\app\build\generated\res\resValues\androidTest\debug
+com.example.android.notepad.test.app-mergeDebugAndroidTestResources-1 E:\NewNotePad\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.example.android.notepad.test.app-mergeDebugAndroidTestResources-2 E:\NewNotePad\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.example.android.notepad.test.app-debugAndroidTest-3 E:\NewNotePad\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources
