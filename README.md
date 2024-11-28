@@ -287,4 +287,196 @@ MyCursorAdapter adapter = new MyCursorAdapter(
                 viewIDs
         );
 ```
-到这里，数据库以及颜色的跳转的部分已经完成，接下来我们还需要在界面中加具体的颜色按钮
+到这里，数据库以及颜色的跳转的部分已经完成，接下来我们还需要将背景的颜色进行更换，首先需要对笔记编辑界面，也就是NoteEditor活动里增加背景颜色的数据
+```Java
+private static final String[] PROJECTION =
+        new String[] {
+            NotePad.Notes._ID,
+            NotePad.Notes.COLUMN_NAME_TITLE,
+            NotePad.Notes.COLUMN_NAME_NOTE,
+                NotePad.Notes.COLUMN_NAME_BACK_COLOR,
+    };
+```
+然后我们需要在onResume()方法中添加从数据库读取颜色，并设置为背景的代码
+```Java
+int x = mCursor.getInt(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_BACK_COLOR));
+        
+        switch (x){
+            case NotePad.Notes.DEFAULT_COLOR:
+                mText.setBackgroundColor(Color.rgb(255, 255, 255));
+                break;
+            case NotePad.Notes.YELLOW_COLOR:
+                mText.setBackgroundColor(Color.rgb(247, 216, 133));
+                break;
+            case NotePad.Notes.BLUE_COLOR:
+                mText.setBackgroundColor(Color.rgb(165, 202, 237));
+                break;
+            case NotePad.Notes.GREEN_COLOR:
+                mText.setBackgroundColor(Color.rgb(161, 214, 174));
+                break;
+            case NotePad.Notes.RED_COLOR:
+                mText.setBackgroundColor(Color.rgb(244, 149, 133));
+                break;
+            case NotePad.Notes.PURPLE_COLOR:
+                mText.setBackgroundColor(Color.rgb(230, 190, 255));
+                break;
+            default:
+                mText.setBackgroundColor(Color.rgb(255, 255, 255));
+                break;
+        }
+```
+接下来需要在editors_options_menu.xml中添加一个改变颜色的图标
+```
+<item android:id="@+id/menu_color"
+        android:title="@string/menu_color"
+        android:icon="@drawable/art"
+        android:showAsAction="always"/>
+```
+又因为在点击该图标后需要一个改变颜色的具体布局，所以创建一个垂直的线性布局，里面的颜色需要在String.xml中自己定义，和前面设置一样的rgb即可
+```
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageButton
+        android:id="@+id/color_white"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:background="@color/colorWhite"
+        android:onClick="white"/>
+    <ImageButton
+        android:id="@+id/color_yellow"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:background="@color/colorYellow"
+        android:onClick="yellow"/>
+    <ImageButton
+        android:id="@+id/color_blue"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:background="@color/colorBlue"
+        android:onClick="blue"/>
+    <ImageButton
+        android:id="@+id/color_green"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:background="@color/colorGreen"
+        android:onClick="green"/>
+    <ImageButton
+        android:id="@+id/color_red"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:background="@color/colorRed"
+        android:onClick="red"/>
+    <ImageButton
+        android:id="@+id/color_purple"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:background="@color/colorPurple"
+        android:onClick="purple"/>
+</LinearLayout>
+```
+然后在NoteEditor中增加相应的跳转
+```Java
+else if(item.getItemId() == R.id.menu_color){
+            changeColor();
+        }
+```
+会跳转到changeColor()方法，该方法将uri信息传递到NoteColor的activity里面
+```Java
+private final void changeColor() {
+        Intent intent = new Intent(null,mUri);
+        intent.setClass(NoteEditor.this,NoteColor.class);
+        NoteEditor.this.startActivity(intent);
+    }
+```
+NoteColor()的代码如下
+```Java
+import android.app.Activity;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+
+public class NoteColor extends Activity {
+    private Cursor mCursor;
+    private Uri mUri;
+    private int color;
+    private static final int COLUMN_INDEX_TITLE = 1;
+    private static final String[] PROJECTION = new String[] {
+            NotePad.Notes._ID, // 0
+            NotePad.Notes.COLUMN_NAME_BACK_COLOR,
+    };
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.note_color);
+        //从NoteEditor传入的uri
+        mUri = getIntent().getData();
+        mCursor = managedQuery(
+                mUri,        // The URI for the note that is to be retrieved.
+                PROJECTION,  // The columns to retrieve
+                null,        // No selection criteria are used, so no where columns are needed.
+                null,        // No where columns are used, so no where values are needed.
+                null         // No sort order is needed.
+        );
+    }
+    @Override
+    protected void onResume(){
+        //执行顺序在onCreate之后
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+            color = mCursor.getInt(COLUMN_INDEX_TITLE);
+        }
+        super.onResume();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ContentValues values = new ContentValues();
+        values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
+        getContentResolver().update(mUri, values, null, null);
+    }
+    public void white(View view){
+        color = NotePad.Notes.DEFAULT_COLOR;
+        finish();
+    }
+    public void yellow(View view){
+        color = NotePad.Notes.YELLOW_COLOR;
+        finish();
+    }
+    public void blue(View view){
+        color = NotePad.Notes.BLUE_COLOR;
+        finish();
+    }
+    public void green(View view){
+        color = NotePad.Notes.GREEN_COLOR;
+        finish();
+    }
+    public void red(View view){
+        color = NotePad.Notes.RED_COLOR;
+        finish();
+    }
+    public void purple(View view){
+        color = NotePad.Notes.PURPLE_COLOR;
+        finish();
+    }
+}
+```
+最后在AndroidManifest里面添加这个activity
+```
+<activity android:name="NoteColor"
+            android:theme="@android:style/Theme.Holo.Light.Dialog"
+            android:label="ChangeColor"
+            android:windowSoftInputMode="stateVisible"/>
+```
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/e.png)
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/f.png)
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/g.png)
+#### 2.笔记排序
