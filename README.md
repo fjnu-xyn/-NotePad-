@@ -480,3 +480,252 @@ public class NoteColor extends Activity {
 ![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/f.png)
 ![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/g.png)
 #### 2.笔记排序
+第一步还是在菜单，也就是list_options_menu.xml里面添加排序
+```
+<item
+        android:id="@+id/menu_sort"
+        android:title="@string/menu_sort"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:showAsAction="always" >
+        <menu>
+            <item
+                android:id="@+id/menu_sort1"
+                android:title="@string/menu_sort1"/>
+            <item
+                android:id="@+id/menu_sort2"
+                android:title="@string/menu_sort2"/>
+            <item
+                android:id="@+id/menu_sort3"
+                android:title="@string/menu_sort3"/>
+        </menu>
+    </item>
+```
+然后在NoteList下增加相应的跳转,三种情况对应三种cursor的排序方式
+```Java
+else if (item.getItemId() == R.id.menu_sort1){
+            cursor = managedQuery(
+                    getIntent().getData(),
+                    PROJECTION,
+                    null,
+                    null,
+                    NotePad.Notes._ID
+            );
+            adapter = new MyCursorAdapter(
+                    this,
+                    R.layout.noteslist_item,
+                    cursor,
+                    dataColumns,
+                    viewIDs
+            );
+            setListAdapter(adapter);
+            return true;
+        }else if (item.getItemId() == R.id.menu_sort2){
+            cursor = managedQuery(
+                    getIntent().getData(),
+                    PROJECTION,
+                    null,
+                    null,
+                    NotePad.Notes.DEFAULT_SORT_ORDER
+            );
+            adapter = new MyCursorAdapter(
+                    this,
+                    R.layout.noteslist_item,
+                    cursor,
+                    dataColumns,
+                    viewIDs
+            );
+            setListAdapter(adapter);
+            return true;
+        }else if (item.getItemId() == R.id.menu_sort3){
+            cursor = managedQuery(
+                    getIntent().getData(),
+                    PROJECTION,
+                    null,
+                    null,
+                    NotePad.Notes.COLUMN_NAME_BACK_COLOR
+            );
+            adapter = new MyCursorAdapter(
+                    this,
+                    R.layout.noteslist_item,
+                    cursor,
+                    dataColumns,
+                    viewIDs
+            );
+            setListAdapter(adapter);
+            return true;
+        }
+```
+下面的截图分别是按创建时间排序，按修改时间排序和按颜色排序<br>
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/h.png)
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/i.png)
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/j.png)
+#### 3.笔记导出
+同样的，在editor_options_menu.xml中添加导出选项
+```
+<item android:id="@+id/menu_output"
+        android:title="@string/menu_output" />
+```
+在NoteEditor的选择方法中加入跳转
+```Java
+else if(item.getItemId() == R.id.menu_output){
+            outputNote();
+        }
+```
+然后定义一个outputNote()方法，将uri信息传到新活动中
+```Java
+private final void outputNote() {
+        Intent intent = new Intent(null,mUri);
+        intent.setClass(NoteEditor.this,OutputText.class);
+        NoteEditor.this.startActivity(intent);
+    }
+```
+这个新活动命名为OutputText.java，里面的write()方法是实现具体导出的
+```Java
+public class OutputText extends Activity {
+    //要使用的数据库中笔记的信息
+    private static final String[] PROJECTION = new String[] {
+            NotePad.Notes._ID, // 0
+            NotePad.Notes.COLUMN_NAME_TITLE, // 1
+            NotePad.Notes.COLUMN_NAME_NOTE, // 2
+            NotePad.Notes.COLUMN_NAME_CREATE_DATE, // 3
+            NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE, // 4
+    };
+    //读取出的值放入这些变量
+    private String TITLE;
+    private String NOTE;
+    private String CREATE_DATE;
+    private String MODIFICATION_DATE;
+    //读取该笔记信息
+    private Cursor mCursor;
+    //导出文件的名字
+    private EditText mName;
+    //NoteEditor传入的uri，用于从数据库查出该笔记
+    private Uri mUri;
+    //关于返回与保存按钮的一个特殊标记，返回的话不执行导出，点击按钮才导出
+    private boolean flag = false;
+    private static final int COLUMN_INDEX_TITLE = 1;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.output_text);
+        mUri = getIntent().getData();
+        mCursor = managedQuery(
+                mUri,        // The URI for the note that is to be retrieved.
+                PROJECTION,  // The columns to retrieve
+                null,        // No selection criteria are used, so no where columns are needed.
+                null,        // No where columns are used, so no where values are needed.
+                null         // No sort order is needed.
+        );
+        mName = (EditText) findViewById(R.id.output_name);
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if (mCursor != null) {
+            // The Cursor was just retrieved, so its index is set to one record *before* the first
+            // record retrieved. This moves it to the first record.
+            mCursor.moveToFirst();
+            //编辑框默认的文件名为标题，可自行更改
+            mName.setText(mCursor.getString(COLUMN_INDEX_TITLE));
+        }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mCursor != null) {
+            //从mCursor读取对应值
+            TITLE = mCursor.getString(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_TITLE));
+            NOTE = mCursor.getString(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_NOTE));
+            CREATE_DATE = mCursor.getString(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_CREATE_DATE));
+            MODIFICATION_DATE = mCursor.getString(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE));
+            //flag在点击导出按钮时会设置为true，执行写文件
+            if (flag == true) {
+                write();
+            }
+            flag = false;
+        }
+    }
+    public void OutputOk(View v){
+        flag = true;
+        finish();
+    }
+    private void write() {
+        // 检查 SD 卡是否挂载
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            try {
+                // 获取文件名，使用笔记名称作为文件名
+                String fileName = mName.getText().toString() + ".txt";
+
+                // 创建 MediaStore 文件内容
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName); // 文件名
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "text/plain"); // 文件类型
+                contentValues.put(MediaStore.Files.FileColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS); // 保存路径为文档文件夹
+
+                // 获取 ContentResolver，并插入新文件
+                Uri uri = getContentResolver().insert(MediaStore.Files.getContentUri("external"), contentValues);
+
+                // 获取文件输出流
+                try (OutputStream outputStream = getContentResolver().openOutputStream(uri)) {
+                    if (outputStream != null) {
+                        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+                        printWriter.println(TITLE);
+                        printWriter.println(NOTE);
+                        printWriter.println("创建时间：" + CREATE_DATE);
+                        printWriter.println("最后一次修改时间：" + MODIFICATION_DATE);
+                        printWriter.close();
+                        Toast.makeText(this, "保存成功, 保存位置: " + uri.toString(), Toast.LENGTH_LONG).show();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+##### 注意：如果你的应用在 Android 10（API 29）及以上版本上运行，并且通过 MediaStore API 进行文件存储，则无需再在 AndroidManifest.xml 中声明 WRITE_EXTERNAL_STORAGE 或 READ_EXTERNAL_STORAGE 权限。由于我的Android项目版本是15，可以使用 MediaStore 来操作共享存储，而不用在Android Manifest里面直接访问文件权限
+下一步是定义一个导出的布局界面
+```
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="6dip"
+    android:paddingRight="6dip"
+    android:paddingBottom="3dip">
+
+    <EditText android:id="@+id/output_name"
+        android:maxLines="1"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="15dp"
+        android:layout_width="wrap_content"
+        android:ems="25"
+        android:layout_height="wrap_content"
+        android:autoText="true"
+        android:capitalize="sentences"
+        android:scrollHorizontally="true" />
+
+    <Button android:id="@+id/output_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="@string/output_ok"
+        android:onClick="OutputOk" />
+</LinearLayout>
+```
+最后在AndroidManifest声明一下，就可以了
+```
+<activity android:name="OutputText"
+            android:label="@string/output_name"
+            android:theme="@android:style/Theme.Holo.Dialog"
+            android:windowSoftInputMode="stateVisible">
+
+        </activity>
+```
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/k.png)
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/l.png)
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/m.png)
+![image](https://github.com/fjnu-xyn/-NotePad-/blob/main/app/src/main/res/drawable/n.png)
